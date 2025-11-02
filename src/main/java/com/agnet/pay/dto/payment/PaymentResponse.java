@@ -10,7 +10,7 @@ import java.util.Map;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class DelegatePaymentResponse {
+public class PaymentResponse {
     private String id;
     private Instant created;
     private Map<String,Object> metadata;

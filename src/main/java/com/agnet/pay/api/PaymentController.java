@@ -1,7 +1,7 @@
-package com.agnet.pay.configurations;
+package com.agnet.pay.api;
 
 
-import com.agnet.pay.data.DataStore;
+import com.agnet.pay.configurations.DataStore;
 import com.agnet.pay.dto.payment.DelegatePaymentRequest;
 import com.agnet.pay.dto.payment.DelegatePaymentResponse;
 import com.agnet.pay.service.TokenService;

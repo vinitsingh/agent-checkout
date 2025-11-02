@@ -1,6 +1,7 @@
-package com.agnet.pay.data;
+package com.agnet.pay.configurations;
 
-import com.agnet.pay.dto.checkout.CheckoutSession;
+import com.agnet.pay.dto.checkout.CheckoutRequest;
+import com.agnet.pay.dto.checkout.CheckoutResponse;
 
 import java.security.KeyPair;
 import java.util.HashMap;
@@ -9,10 +10,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class DataStore {
 
-    public static final Map<String, CheckoutSession> SESSIONS = new ConcurrentHashMap<>();
+    public static final Map<String, CheckoutResponse> SESSIONS = new ConcurrentHashMap<>();
     public static final Map<String, String> IDEMPOTENCY = new ConcurrentHashMap<>();
-    public static final Map<String, Map<String,Object>> checkoutSessions = new HashMap<>();
-
     public static final Map<String, Map<String,Object>> delegatedTokens = new HashMap<>();
     public static KeyPair AGENT_KEYPAIR;
     public static KeyPair PSP_KEYPAIR;

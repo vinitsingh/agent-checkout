@@ -6,17 +6,12 @@ import lombok.Data;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Address {
-    private String name;
-    private String city;
-    private String state;
-    private String country;
-    private String postalCode;
+public class Buyer {
 
+    @JsonProperty("first_name")
+    private String firstName;
+    private String email;
     @JsonProperty("phone_number")
     private String phoneNumber;
-    @JsonProperty("line_one")
-    private String lineOne;
-    @JsonProperty("line_two")
-    private String lineTwo;
+
 }

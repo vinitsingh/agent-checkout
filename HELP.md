@@ -1,7 +1,7 @@
 # Read Me First
 The following was discovered as part of building this project:
 
-* The original package name 'com.agnet.pay.agnet-checkout' is invalid and this project uses 'com.agnet.pay.agnet_checkout' instead.
+* The original package name 'com.agnet.pay.agent-checkout' is invalid and this project uses 'com.agnet.pay.agnet_checkout' instead.
 
 # Getting Started
 

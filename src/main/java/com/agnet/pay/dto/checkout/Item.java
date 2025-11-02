@@ -1,12 +1,11 @@
-package com.agnet.pay.dto.payment;
+package com.agnet.pay.dto.checkout;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RiskSignal {
-    private String type;
-    private int score;
-    private String action;
+public class Item {
+    private String id;
+    private int quantity;
 }

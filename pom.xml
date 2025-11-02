@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.agnet.pay</groupId>
-    <artifactId>agnet-checkout</artifactId>
+    <artifactId>agent-checkout</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>agnet-checkout</name>
+    <name>agent-checkout</name>
     <description>Demo project for Spring Boot</description>
 
     <properties>

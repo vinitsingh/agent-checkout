@@ -1,6 +1,6 @@
 package com.agnet.pay.service;
 
-import com.agnet.pay.data.DataStore;
+import com.agnet.pay.configurations.DataStore;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.*;
 import com.nimbusds.jwt.JWTClaimsSet;

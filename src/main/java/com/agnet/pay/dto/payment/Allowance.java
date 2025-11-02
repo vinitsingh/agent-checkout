@@ -1,10 +1,12 @@
 package com.agnet.pay.dto.payment;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import java.time.Instant;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Allowance {
     private String reason;
     private long maxAmount;

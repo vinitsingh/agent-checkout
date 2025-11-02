@@ -1,11 +1,11 @@
 package com.agnet.pay.service;
 
 
-import com.agnet.pay.data.DataStore;
-import com.agnet.pay.dto.checkout.Address;
-import com.agnet.pay.dto.checkout.CheckoutSession;
-import com.agnet.pay.dto.checkout.CreateSessionRequest;
+import com.agnet.pay.configurations.DataStore;
+import com.agnet.pay.dto.checkout.*;
 import com.agnet.pay.dto.payment.FulfillmentOption;
+import com.agnet.pay.dto.payment.PaymentData;
+import com.agnet.pay.dto.payment.PaymentMethod;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -15,52 +15,93 @@ import java.util.*;
 @Service
 public class CheckoutService {
 
-    public CheckoutSession createSession(CreateSessionRequest req) {
-        String id = "sess_" + UUID.randomUUID().toString().substring(0, 8);
-        CheckoutSession s = new CheckoutSession();
-        s.setId(id);
-        s.setStatus("not_ready_for_payment");
-        s.setCurrency("USD");
-        s.setLineItems(req.getItems());
-        s.setBuyer(req.getBuyer());
-        s.setFulfillmentAddress(req.getFulfillmentAddress());
-        s.setFulfillmentOptions(List.of(new FulfillmentOption("ship_standard", "Standard Shipping", 500)));
-        s.setExpiresAt(Instant.now().plus(1, ChronoUnit.HOURS));
-        s.setMetadata(req.getMetadata());
-        DataStore.SESSIONS.put(id, s);
-        return s;
+    public CheckoutResponse createSession(CheckoutRequest req) {
+        CheckoutResponse response = new CheckoutResponse();
+        String id = UUID.randomUUID().toString();
+        response.setId(id);
+        PaymentProvider paymentProvider = new PaymentProvider();
+        paymentProvider.setProvider("Fiserv");
+        paymentProvider.setSupportedPaymentMethods(List.of(SupportedPaymentMethods.card.name()));
+        response.setPaymentProvider(paymentProvider);
+        response.setStatus(Status.not_ready_for_payment);
+        response.setCurrency("USD");
+
+        // TODO: merchant Inventory lookup for Item
+        Item item = new Item();
+        LineItem lineItem = new LineItem();
+        lineItem.setItem(item);
+
+        // TODO: total calculation based on Item price and Tax
+        Total total = new Total();
+        response.setTotals(List.of(total));
+
+        //TODO: based on merchant Inventory
+        FulfillmentOption fulfillmentOption = new FulfillmentOption();
+        response.setFulfillmentOptions(List.of(fulfillmentOption));
+
+        //TODO:  business logic
+        Message message = new Message();
+        message.setCode(Code.success);
+        response.setMessages(List.of(message));
+
+        //TODO: business logic
+        Link link = new Link();
+        response.setLinks(List.of(link));
+
+        DataStore.SESSIONS.put(id, response);
+        return response;
     }
 
-    public CheckoutSession updateSession(String id, Map<String, Object> updates) {
-        CheckoutSession s = DataStore.SESSIONS.get(id);
-        if (s == null) return null;
-        if (updates.containsKey("line_items")) s.setLineItems((List<Map<String, Object>>) updates.get("line_items"));
-        if (updates.containsKey("buyer")) s.setBuyer((Map<String, Object>) updates.get("buyer"));
-        if (updates.containsKey("fulfillmentAddress"))
-            s.setFulfillmentAddress((Address) updates.get("fulfillmentAddress"));
-        if (updates.containsKey("metadata")) s.setMetadata((Map<String, Object>) updates.get("metadata"));
-        return s;
+    public CheckoutResponse updateSession(String id, CheckoutRequest updates) {
+        CheckoutResponse response = DataStore.SESSIONS.get(id);
+        if (updates == null) return null;
+
+        List<LineItem> lineItems = new ArrayList<>();
+        if (updates.getItems() != null) {
+            for (Item item : updates.getItems()) {
+                LineItem lineItem = new LineItem();
+                lineItem.setId(UUID.randomUUID().toString());
+                lineItem.setItem(item);
+                lineItems.add(lineItem);
+            }
+        }
+        response.setLineItems(lineItems);
+        response.setStatus(Status.not_ready_for_payment);
+
+        FulfillmentOption fulfillmentOption = new FulfillmentOption();
+        response.setFulfillmentOptions(List.of(fulfillmentOption));
+
+        Address address = new Address();
+        response.setFulfillmentAddress(address);
+
+        Total total = new Total();
+        response.setTotals(List.of(total));
+
+        Link link = new Link();
+        response.setLinks(List.of(link));
+
+        return response;
     }
 
-    public CheckoutSession getSession(String id) {
+    public CheckoutResponse getSession(String id) {
         return DataStore.SESSIONS.get(id);
     }
 
     public boolean cancelSession(String id) {
-        CheckoutSession s = DataStore.SESSIONS.get(id);
-        if (s == null) return false;
-        s.setStatus("canceled");
-        DataStore.SESSIONS.put(id, s);
+        CheckoutResponse response = DataStore.SESSIONS.get(id);
+        if (response == null) return false;
+        response.setStatus(Status.canceled);
+        DataStore.SESSIONS.put(id, response);
         return true;
     }
 
-    public CheckoutSession completeSession(String id, String delegatedToken, Long totalCents) {
-        CheckoutSession s = DataStore.SESSIONS.get(id);
-        if (s == null) return null;
-        s.setDelegatedToken(delegatedToken);
-        s.setStatus("completed");
-        DataStore.SESSIONS.put(id, s);
-        return s;
+    public CheckoutResponse completeSession(String id) {
+        CheckoutResponse response = DataStore.SESSIONS.get(id);
+        if (response == null) return null;
+        response.setBuyer(new Buyer());
+        response.setPaymentData(new PaymentData());
+        DataStore.SESSIONS.put(id, response);
+        return response;
     }
 
     public boolean idempotencySeen(String idempotencyKey) {

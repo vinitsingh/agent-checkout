@@ -30,6 +30,7 @@ public class CheckoutService {
         Item item = new Item();
         LineItem lineItem = new LineItem();
         lineItem.setItem(item);
+        response.setLineItems(List.of(lineItem));
 
         // TODO: total calculation based on Item price and Tax
         Total total = new Total();
@@ -41,7 +42,7 @@ public class CheckoutService {
 
         //TODO:  business logic
         Message message = new Message();
-        message.setCode(Code.success);
+        //message.setCode(Code.success);
         response.setMessages(List.of(message));
 
         //TODO: business logic
@@ -99,6 +100,7 @@ public class CheckoutService {
         CheckoutResponse response = DataStore.SESSIONS.get(id);
         if (response == null) return null;
         response.setBuyer(new Buyer());
+        response.setStatus(Status.completed);
         response.setPaymentData(new PaymentData());
         DataStore.SESSIONS.put(id, response);
         return response;

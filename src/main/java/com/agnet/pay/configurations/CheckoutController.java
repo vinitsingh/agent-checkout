@@ -6,6 +6,8 @@ import com.agnet.pay.dto.checkout.CompleteSessionRequest;
 import com.agnet.pay.dto.checkout.CreateSessionRequest;
 import com.agnet.pay.service.CheckoutService;
 import com.agnet.pay.service.SignatureVerificationService;
+import com.agnet.pay.service.TokenService;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,14 +16,11 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/checkout_sessions")
+@AllArgsConstructor
 public class CheckoutController {
     private final CheckoutService checkoutService;
     private final SignatureVerificationService sigService;
-
-    public CheckoutController(CheckoutService checkoutService, SignatureVerificationService sigService) {
-        this.checkoutService = checkoutService;
-        this.sigService = sigService;
-    }
+    private final TokenService tokenService;
 
     @PostMapping
     public ResponseEntity<?> create(@RequestBody CreateSessionRequest req,
@@ -57,10 +56,6 @@ public class CheckoutController {
         return ResponseEntity.ok(Map.of("status", "canceled", "id", id));
     }
 
-    /**
-     * Complete: agent sends delegated payment token and TAP signature to prove consent.
-     * Headers expected: Signature-Input, Signature, Request-Id, Idempotency-Key
-     */
     @PostMapping("/{id}/complete")
     public ResponseEntity<?> complete(@PathVariable String id,
                                       @RequestHeader(value = "Signature-Input", required = false) String sigInput,
@@ -89,9 +84,24 @@ public class CheckoutController {
 
         // Optional: verify total matches session computed totals (demo uses provided total or line items)
         Long total = body.getTotalCents();
+
         CheckoutSession session = checkoutService.getSession(id);
         if (session == null) return ResponseEntity.status(404).body(Map.of("error", "session_not_found"));
+
         // compute total if not provided
+        total = getTotal(total, session);
+
+        // TODO: This should call commerce hub Payment Auth API
+        boolean verified = tokenService.validateDelegatedToken(body.getPaymentToken(), "GIFT", total, id);
+        if (verified) {
+            CheckoutSession completed = checkoutService.completeSession(id, body.getPaymentToken(), total);
+            if (idempotencyKey != null) checkoutService.recordIdempotency(idempotencyKey, id);
+            return ResponseEntity.ok(completed);
+        }
+        return ResponseEntity.badRequest().build();
+    }
+
+    private static Long getTotal(Long total, CheckoutSession session) {
         if (total == null) {
             long sum = 0;
             if (session.getLineItems() != null) {
@@ -102,13 +112,6 @@ public class CheckoutController {
             }
             total = sum;
         }
-
-        // For demo: we don't call PSP here; assume token valid and in-scope
-        CheckoutSession completed = checkoutService.completeSession(id, body.getPaymentToken(), total);
-
-        // record idempotency
-        if (idempotencyKey != null) checkoutService.recordIdempotency(idempotencyKey, id);
-
-        return ResponseEntity.ok(completed);
+        return total;
     }
 }

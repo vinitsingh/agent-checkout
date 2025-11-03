@@ -10,5 +10,5 @@ import lombok.Data;
 public class RiskSignal {
     private String type;
     private int score;
-    private String action;
+    private RiskSignalAction action;
 }

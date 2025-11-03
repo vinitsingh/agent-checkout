@@ -1,6 +1,7 @@
 package com.agnet.pay.service;
 
 import com.agnet.pay.configurations.DataStore;
+import com.agnet.pay.dto.payment.CardNumberType;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.*;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -20,11 +21,11 @@ import java.util.UUID;
 @Service
 public class TokenService {
 
-    public String issueDelegatedToken(String checkoutSessionId, long maxAmount, String currency, String merchantId, long ttlSeconds, Map<String, Object> metadata) throws Exception {
+    public String issueDelegatedToken(String id, String checkoutSessionId, long maxAmount, String currency, String merchantId, long ttlSeconds, CardNumberType type, String number, String expireMonth, String expireYear) throws Exception {
         Instant now = Instant.now();
         JWTClaimsSet.Builder cb = new JWTClaimsSet.Builder();
-        cb.issuer("fiserv_ch_psp");
-        cb.subject("FI#" + UUID.randomUUID().toString().substring(0, 10));
+        cb.issuer("fiserv");
+        cb.subject(id);
         cb.audience(merchantId);
         cb.issueTime(Date.from(now));
         cb.expirationTime(Date.from(now.plusSeconds(ttlSeconds)));
@@ -32,10 +33,12 @@ public class TokenService {
                 "max_amount", maxAmount,
                 "currency", currency,
                 "checkout_session_id", checkoutSessionId,
-                "merchant_id", merchantId
+                "merchant_id", merchantId,
+                "cardNumberType", type,
+                "number", number,
+                "expireMonth", expireMonth,
+                "expireYear", expireYear
         ));
-        if (metadata != null) cb.claim("metadata", metadata);
-
         SignedJWT sj = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), cb.build());
         JWSSigner signer = new RSASSASigner(DataStore.PSP_KEYPAIR.getPrivate());
         sj.sign(signer);

@@ -35,19 +35,18 @@ public class PaymentController {
         if (req.getPaymentMethod() == null || req.getAllowance() == null || req.getMetadata() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "invalid_request", "message", "Missing required fields"));
         }
-
-        // TODO: verify signature - PSP verify the agent signature
-        // Issue delegated token (JWT) with scope
+        String id = "FI#" + Instant.now().toEpochMilli();
         String token = tokenService.issueDelegatedToken(
+                id,
                 req.getAllowance().getCheckoutSessionId(),
                 req.getAllowance().getMaxAmount(),
                 req.getAllowance().getCurrency(),
                 req.getAllowance().getMerchantId(),
                 600,
-                Map.of("agent_id", req.getMetadata().get("agent_id"))
-        );
-
-        String id = "FI#" + Instant.now().toEpochMilli();
+                req.getPaymentMethod().getCardNumberType(),
+                req.getPaymentMethod().getNumber(),
+                req.getPaymentMethod().getExpMonth(),
+                req.getPaymentMethod().getExpYear());
 
         DataStore.delegatedTokens.put(id, Map.of("jwt", token, "metadata", req.getMetadata()));
 

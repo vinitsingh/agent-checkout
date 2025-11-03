@@ -4,7 +4,7 @@ import com.agnet.pay.configurations.DataStore;
 import com.agnet.pay.dto.checkout.CheckoutRequest;
 import com.agnet.pay.dto.checkout.CheckoutResponse;
 import com.agnet.pay.service.CheckoutService;
-import com.agnet.pay.service.SignatureVerificationService;
+import com.agnet.pay.service.SignatureService;
 import com.agnet.pay.service.TokenService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +18,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class CheckoutController {
     private final CheckoutService checkoutService;
-    private final SignatureVerificationService sigService;
+    private final SignatureService sigService;
     private final TokenService tokenService;
 
     @PostMapping

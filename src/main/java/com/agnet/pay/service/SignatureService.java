@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
  * Production: implement canonicalization per spec and verify RSA-PSS or ECDSA using agent public keys.
  */
 @Service
-public class SignatureVerificationService {
+public class SignatureService {
 
     /**
      * Verify the signature header value for the canonical string.
